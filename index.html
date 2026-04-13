@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>JARVIS — Ultimate AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --blue:#00cfff;--blue2:#0099cc;--bg0:#010a10;--bg1:#021420;--bg2:rgba(0,30,50,0.8);
+  --green:#00ff88;--red:#ff3c3c;--yellow:#ffcc00;--orange:#ff8800;--purple:#aa77ff;
+  --wa:#25d366;--text:#cef5ff;--muted:#4a8fa8;--glow:rgba(0,207,255,0.3);
+  --surface:rgba(0,25,45,0.85);--border:rgba(0,207,255,0.13);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{font-family:'Exo 2',sans-serif;background:var(--bg0);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,207,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,207,255,0.03) 1px,transparent 1px);background-size:36px 36px;animation:grid 25s linear infinite;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% -10%,rgba(0,207,255,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;}
+@keyframes grid{to{background-position:36px 36px,36px 36px;}}
+
+/* ── HEADER ── */
+header{position:relative;z-index:10;width:100%;text-align:center;padding:16px 16px 4px;}
+.brand{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1.7rem,8vw,2.8rem);letter-spacing:.4em;color:var(--blue);text-shadow:0 0 24px var(--glow);animation:flicker 9s infinite;}
+.subtitle{font-size:.62rem;letter-spacing:.28em;color:var(--muted);margin-top:2px;}
+@keyframes flicker{0%,93%,95%,97%,100%{opacity:1;}94%,96%{opacity:.8;}}
+
+/* ── HUD BAR ── */
+.hud{position:relative;z-index:10;width:100%;max-width:500px;display:flex;justify-content:space-evenly;align-items:center;padding:5px 12px;flex-wrap:wrap;gap:4px;}
+.hpill{display:flex;align-items:center;gap:4px;background:rgba(0,207,255,0.05);border:1px solid var(--border);border-radius:20px;padding:4px 9px;font-size:.64rem;color:var(--muted);white-space:nowrap;}
+.hpill span{color:var(--text);}
+.bat{width:18px;height:8px;border:1.5px solid var(--muted);border-radius:2px;position:relative;}
+.bat::after{content:'';position:absolute;right:-3px;top:50%;transform:translateY(-50%);width:2px;height:4px;background:var(--muted);border-radius:0 1px 1px 0;}
+.batf{height:100%;border-radius:1px;background:var(--green);transition:width .5s,background .5s;}
+
+/* ── NAV TABS ── */
+.nav{position:relative;z-index:10;width:100%;max-width:500px;display:flex;gap:4px;padding:6px 12px;overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.ntab{flex-shrink:0;background:rgba(0,207,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.66rem;font-family:'Exo 2',sans-serif;padding:6px 12px;cursor:pointer;transition:all .2s;letter-spacing:.05em;white-space:nowrap;}
+.ntab.active{background:rgba(0,207,255,0.14);border-color:rgba(0,207,255,0.45);color:var(--blue);}
+
+/* ── MAIN ── */
+main{position:relative;z-index:10;width:100%;max-width:500px;padding:4px 12px 130px;display:flex;flex-direction:column;gap:10px;}
+
+/* ── PAGE SECTIONS ── */
+.page{display:none;flex-direction:column;gap:10px;}
+.page.active{display:flex;}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px;backdrop-filter:blur(14px);}
+.card-title{font-size:.6rem;letter-spacing:.22em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.card-title .dot{width:5px;height:5px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+
+/* ── STATUS ── */
+.status-bar{display:flex;align-items:center;gap:8px;font-size:.7rem;letter-spacing:.14em;color:var(--muted);padding:0 2px;}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);animation:pulse 2s infinite;}
+.sdot.idle{background:var(--muted);box-shadow:none;animation:none;}
+.sdot.red{background:var(--red);box-shadow:0 0 8px var(--red);}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+
+/* ── ORB ── */
+.orb-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 0;}
+.orb{width:124px;height:124px;border-radius:50%;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s;}
+.orb:active{transform:scale(.95);}
+.oring{position:absolute;border-radius:50%;border:1.5px solid rgba(0,207,255,0.28);animation:spin 9s linear infinite;}
+.oring:nth-child(1){inset:0;}
+.oring:nth-child(2){inset:-11px;border-color:rgba(0,207,255,0.13);animation-duration:14s;animation-direction:reverse;border-style:dashed;}
+.oring:nth-child(3){inset:-22px;border-color:rgba(0,207,255,0.06);animation-duration:22s;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ocore{width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 38% 38%,#003a55,#001525 60%,#00080e);border:1.5px solid rgba(0,207,255,0.38);box-shadow:0 0 28px rgba(0,207,255,0.18),inset 0 0 28px rgba(0,207,255,0.09);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;position:relative;z-index:2;transition:box-shadow .3s,border-color .3s;}
+.ocore svg{width:28px;height:28px;stroke:var(--blue);fill:none;stroke-width:1.5;filter:drop-shadow(0 0 5px var(--blue));}
+.ocore span{font-family:'Orbitron',monospace;font-size:.48rem;letter-spacing:.1em;color:var(--blue2);}
+.orb.listening .ocore{border-color:var(--blue);box-shadow:0 0 55px rgba(0,207,255,0.5),inset 0 0 36px rgba(0,207,255,0.18);animation:op .8s ease-in-out infinite alternate;}
+.orb.thinking .ocore{border-color:var(--yellow);box-shadow:0 0 38px rgba(255,204,0,0.38);}
+.orb.speaking .ocore{border-color:var(--green);box-shadow:0 0 38px rgba(0,255,136,0.35);}
+@keyframes op{from{transform:scale(1);}to{transform:scale(1.05);}}
+.tap-hint{font-size:.58rem;letter-spacing:.2em;color:var(--muted);animation:blink 2.2s step-start infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+/* ── CHAT ── */
+#chatBox{height:230px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:10px;scroll-behavior:smooth;}
+#chatBox::-webkit-scrollbar{width:3px;}
+#chatBox::-webkit-scrollbar-thumb{background:rgba(0,207,255,0.18);border-radius:3px;}
+.msg{display:flex;flex-direction:column;gap:3px;animation:mi .22s ease-out;}
+@keyframes mi{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+.mlabel{font-size:.55rem;letter-spacing:.18em;color:var(--muted);}
+.mb{padding:9px 13px;border-radius:9px;font-size:.86rem;line-height:1.55;max-width:88%;}
+.msg.user{align-items:flex-end;}
+.msg.user .mb{background:rgba(0,207,255,0.1);border:1px solid rgba(0,207,255,0.2);color:var(--text);border-bottom-right-radius:2px;}
+.msg.jarvis .mb{background:rgba(0,12,22,0.7);border:1px solid rgba(0,207,255,0.08);color:#a8eaff;border-bottom-left-radius:2px;}
+.msg.sys .mb{background:rgba(255,170,0,0.07);border:1px solid rgba(255,170,0,0.15);color:#ffcc66;font-size:.76rem;width:100%;text-align:center;border-radius:7px;}
+.msg.wamsg .mb{background:rgba(37,211,102,0.07);border:1px solid rgba(37,211,102,0.2);color:#8bfdb8;font-size:.82rem;border-radius:9px;}
+.msg.errmsg .mb{background:rgba(255,60,60,0.07);border:1px solid rgba(255,60,60,0.2);color:#ffaaaa;font-size:.82rem;border-radius:9px;}
+.tdots span{display:inline-block;width:5px;height:5px;background:var(--blue);border-radius:50%;margin:0 2px;animation:td 1.2s infinite;}
+.tdots span:nth-child(2){animation-delay:.2s;}
+.tdots span:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-5px);opacity:1;}}
+
+/* ── INPUTS ── */
+.irow{display:flex;gap:7px;}
+.tinput{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s;}
+.tinput:focus{border-color:var(--blue);}
+.tinput::placeholder{color:var(--muted);}
+.sbtn{background:rgba(0,207,255,0.11);border:1px solid rgba(0,207,255,0.3);border-radius:9px;color:var(--blue);padding:10px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;}
+.sbtn:hover{background:rgba(0,207,255,0.2);}
+.sbtn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;}
+
+/* ── QUICK BUTTONS ── */
+.qlabel{font-size:.58rem;letter-spacing:.18em;color:var(--muted);padding:0 2px;}
+.qrow{display:flex;flex-wrap:wrap;gap:6px;}
+.qb{background:rgba(0,207,255,0.04);border:1px solid var(--border);border-radius:18px;color:var(--muted);font-size:.68rem;font-family:'Exo 2',sans-serif;padding:5px 12px;cursor:pointer;transition:all .2s;}
+.qb:hover{color:var(--blue);border-color:rgba(0,207,255,0.38);background:rgba(0,207,255,0.09);}
+.qb.g:hover{color:var(--wa);border-color:rgba(37,211,102,0.4);background:rgba(37,211,102,0.09);}
+.qb.p:hover{color:var(--purple);border-color:rgba(170,119,255,0.4);background:rgba(170,119,255,0.09);}
+
+/* ── FORM FIELDS ── */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+.flabel{font-size:.58rem;letter-spacing:.14em;color:var(--muted);}
+.finput{background:rgba(0,207,255,0.04);border:1px solid rgba(0,207,255,0.18);border-radius:8px;padding:8px 11px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.82rem;outline:none;width:100%;transition:border-color .2s;}
+.finput:focus{border-color:var(--blue);}
+.finput::placeholder{color:var(--muted);}
+textarea.finput{resize:vertical;min-height:64px;}
+.frow{display:flex;gap:6px;}
+.fbtn{background:rgba(0,207,255,0.1);border:1px solid rgba(0,207,255,0.3);border-radius:8px;color:var(--blue);font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:.08em;padding:8px 13px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.fbtn:hover{background:rgba(0,207,255,0.2);}
+.fbtn.green{background:rgba(37,211,102,0.1);border-color:rgba(37,211,102,0.3);color:var(--wa);}
+.fbtn.green:hover{background:rgba(37,211,102,0.2);}
+.fbtn.red{background:rgba(255,60,60,0.08);border-color:rgba(255,60,60,0.25);color:var(--red);}
+.fbtn.purple{background:rgba(170,119,255,0.1);border-color:rgba(170,119,255,0.3);color:var(--purple);}
+.fbtn.full{width:100%;justify-content:center;}
+select.finput option{background:#021420;}
+
+/* ── LANGUAGE / CTRL ── */
+.ctrl{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.lsel{background:rgba(0,207,255,0.04);border:1px solid rgba(0,207,255,0.18);border-radius:8px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.73rem;padding:6px 9px;outline:none;cursor:pointer;flex:1;min-width:110px;}
+.lsel option{background:#021420;}
+.mbtn{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.22);border-radius:8px;color:var(--green);font-size:.66rem;font-family:'Orbitron',monospace;padding:6px 11px;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.mbtn:hover{background:rgba(0,255,136,0.15);}
+
+/* ── MEMORY PANEL ── */
+.mempanel{background:rgba(0,20,10,0.85);border:1px solid rgba(0,255,136,0.14);border-radius:12px;padding:13px;display:none;}
+.mempanel.show{display:block;}
+.memgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}
+.memitem{background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.1);border-radius:8px;padding:7px 9px;}
+.memk{font-size:.56rem;letter-spacing:.12em;color:var(--muted);display:block;}
+.memv{font-size:.8rem;color:var(--text);display:block;margin-top:2px;word-break:break-word;}
+.memf{font-size:.58rem;color:var(--muted);cursor:pointer;margin-top:3px;display:inline-block;transition:color .2s;}
+.memf:hover{color:var(--red);}
+
+/* ── WEATHER ── */
+.wtop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.wcity{font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:.12em;color:var(--blue);}
+.wdesc{font-size:.68rem;color:var(--muted);margin-top:2px;text-transform:capitalize;}
+.wtemp{font-family:'Orbitron',monospace;font-size:1.9rem;color:var(--text);line-height:1;}
+.wu{font-size:.72rem;color:var(--muted);}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.wstat{background:rgba(0,207,255,0.04);border:1px solid rgba(0,207,255,0.08);border-radius:8px;padding:7px;text-align:center;}
+.wslabel{font-size:.54rem;letter-spacing:.1em;color:var(--muted);display:block;}
+.wsval{font-size:.82rem;color:var(--text);display:block;margin-top:2px;}
+
+/* ── CONTACTS ── */
+#contactList{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;}
+#contactList::-webkit-scrollbar{width:3px;}
+#contactList::-webkit-scrollbar-thumb{background:rgba(0,207,255,0.15);border-radius:3px;}
+.ci{display:flex;align-items:center;gap:9px;background:rgba(0,207,255,0.04);border:1px solid rgba(0,207,255,0.1);border-radius:9px;padding:8px 11px;animation:mi .2s ease-out;}
+.cav{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#003a55,#001525);border:1px solid rgba(0,207,255,0.22);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:.75rem;color:var(--blue);flex-shrink:0;}
+.cinfo{flex:1;min-width:0;}
+.cname{font-size:.84rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cnum{font-size:.66rem;color:var(--muted);margin-top:1px;}
+.cact{display:flex;gap:4px;flex-shrink:0;}
+.cab{width:28px;height:28px;border-radius:7px;border:1px solid;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;transition:all .2s;background:transparent;}
+.cab.call{border-color:rgba(0,207,255,0.22);color:var(--blue);}
+.cab.call:hover{background:rgba(0,207,255,0.12);}
+.cab.wa{border-color:rgba(37,211,102,0.28);color:var(--wa);}
+.cab.wa:hover{background:rgba(37,211,102,0.12);}
+.cab.del{border-color:rgba(255,60,60,0.18);color:var(--red);}
+.cab.del:hover{background:rgba(255,60,60,0.09);}
+
+/* ── WA TABS ── */
+.watabs{display:flex;gap:5px;margin-bottom:10px;}
+.watab{flex:1;background:rgba(37,211,102,0.04);border:1px solid rgba(37,211,102,0.14);border-radius:7px;color:var(--muted);font-size:.66rem;font-family:'Exo 2',sans-serif;padding:6px 8px;cursor:pointer;transition:all .2s;text-align:center;}
+.watab.active{background:rgba(37,211,102,0.14);border-color:rgba(37,211,102,0.38);color:var(--wa);}
+.wasec{display:none;}
+.wasec.show{display:block;}
+
+/* ── REMINDERS ── */
+#remList{display:flex;flex-direction:column;gap:6px;max-height:110px;overflow-y:auto;}
+.ritem{display:flex;justify-content:space-between;align-items:center;background:rgba(0,207,255,0.04);border:1px solid rgba(0,207,255,0.1);border-radius:7px;padding:7px 11px;font-size:.78rem;animation:mi .2s ease-out;}
+.rdel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;transition:color .2s;}
+.rdel:hover{color:var(--red);}
+
+/* ── NOTES ── */
+#notesList{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto;}
+.nitem{background:rgba(170,119,255,0.05);border:1px solid rgba(170,119,255,0.14);border-radius:8px;padding:9px 12px;animation:mi .2s ease-out;}
+.ntime{font-size:.57rem;color:var(--muted);display:block;margin-bottom:3px;}
+.ntext{font-size:.82rem;color:var(--text);line-height:1.5;}
+.ndel{font-size:.58rem;color:var(--muted);cursor:pointer;margin-top:5px;display:inline-block;transition:color .2s;}
+.ndel:hover{color:var(--red);}
+
+/* ── CALCULATOR ── */
+.calc{background:rgba(0,10,20,0.9);border:1px solid var(--border);border-radius:12px;padding:13px;}
+.calcdisp{background:rgba(0,207,255,0.04);border:1px solid rgba(0,207,255,0.1);border-radius:8px;padding:10px 13px;margin-bottom:10px;text-align:right;}
+.calcexpr{font-size:.7rem;color:var(--muted);min-height:18px;word-break:break-all;}
+.calcres{font-family:'Orbitron',monospace;font-size:1.7rem;color:var(--text);min-height:42px;word-break:break-all;}
+.calcgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.ck{background:rgba(0,207,255,0.06);border:1px solid rgba(0,207,255,0.14);border-radius:8px;padding:12px 6px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.9rem;cursor:pointer;transition:all .15s;text-align:center;user-select:none;}
+.ck:active{transform:scale(.94);}
+.ck.op{background:rgba(0,207,255,0.12);color:var(--blue);}
+.ck.eq{background:rgba(0,207,255,0.22);color:var(--blue);font-weight:600;}
+.ck.sp{background:rgba(255,60,60,0.1);color:var(--red);}
+
+/* ── TIMER ── */
+.timerdisp{font-family:'Orbitron',monospace;font-size:2.5rem;color:var(--text);text-align:center;padding:16px 0;letter-spacing:.1em;}
+.timerdisp.running{color:var(--green);text-shadow:0 0 18px rgba(0,255,136,0.4);}
+.timerdisp.expired{color:var(--red);text-shadow:0 0 18px rgba(255,60,60,0.4);animation:flash .5s infinite alternate;}
+@keyframes flash{from{opacity:1;}to{opacity:.4;}}
+.trow{display:flex;gap:6px;margin-bottom:8px;}
+.tnum{width:60px;text-align:center;}
+
+/* ── CURRENCY ── */
+.currrow{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;margin-bottom:8px;}
+.currlabel{font-size:.58rem;letter-spacing:.12em;color:var(--muted);display:block;margin-bottom:4px;}
+.currresult{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.14);border-radius:8px;padding:10px 13px;text-align:center;margin-top:6px;}
+.currval{font-family:'Orbitron',monospace;font-size:1.4rem;color:var(--green);}
+.currsub{font-size:.68rem;color:var(--muted);margin-top:2px;}
+.swap-icon{font-size:1.2rem;color:var(--muted);text-align:center;cursor:pointer;padding:8px 4px;transition:color .2s;align-self:flex-end;padding-bottom:10px;}
+.swap-icon:hover{color:var(--blue);}
+
+/* ── PERSONALITY ── */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.pcard{background:rgba(0,207,255,0.04);border:1px solid var(--border);border-radius:9px;padding:10px;cursor:pointer;transition:all .2s;text-align:center;}
+.pcard.active{border-color:rgba(0,207,255,0.5);background:rgba(0,207,255,0.1);}
+.pcard:hover{border-color:rgba(0,207,255,0.3);}
+.picon{font-size:1.5rem;display:block;margin-bottom:5px;}
+.pname{font-size:.78rem;color:var(--text);}
+.pdesc{font-size:.62rem;color:var(--muted);margin-top:2px;}
+
+/* ── API SECTION ── */
+.api-note{font-size:.58rem;color:var(--muted);margin-top:5px;}
+.api-note a{color:var(--blue2);}
+
+/* ── VOICE HELP ── */
+.vcmd{background:rgba(37,211,102,0.04);border:1px solid rgba(37,211,102,0.1);border-radius:8px;padding:10px 12px;font-size:.7rem;color:var(--muted);line-height:1.85;}
+.vcmd b{color:var(--wa);}
+
+/* ── EMPTY STATE ── */
+.empty{color:var(--muted);font-size:.74rem;text-align:center;padding:10px;}
+
+/* ── MIC BUTTON ── */
+.botbar{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;justify-content:center;padding:12px 0 20px;background:linear-gradient(to top,var(--bg0) 55%,transparent);}
+#micBtn{width:66px;height:66px;border-radius:50%;border:2px solid rgba(0,207,255,0.38);background:radial-gradient(circle at 38% 38%,#003a55,#001525);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(0,207,255,0.18),0 4px 18px rgba(0,0,0,0.5);transition:all .2s;}
+#micBtn:active{transform:scale(.94);}
+#micBtn.listening{border-color:var(--blue);box-shadow:0 0 55px rgba(0,207,255,0.55),0 4px 18px rgba(0,0,0,0.5);animation:mp 1s ease-in-out infinite alternate;}
+#micBtn.thinking{border-color:var(--yellow);box-shadow:0 0 38px rgba(255,204,0,0.45);}
+#micBtn.speaking{border-color:var(--green);box-shadow:0 0 38px rgba(0,255,136,0.38);}
+@keyframes mp{from{box-shadow:0 0 28px rgba(0,207,255,0.38);}to{box-shadow:0 0 65px rgba(0,207,255,0.75);}}
+#micBtn svg{width:25px;height:25px;stroke:var(--blue);fill:none;stroke-width:1.8;filter:drop-shadow(0 0 5px var(--blue));}
+#micBtn.listening svg{filter:drop-shadow(0 0 11px var(--blue));}
+#micBtn.thinking svg{stroke:var(--yellow);filter:drop-shadow(0 0 7px var(--yellow));}
+#micBtn.speaking svg{stroke:var(--green);filter:drop-shadow(0 0 7px var(--green));}
+
+/* ── TOAST ── */
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-70px);background:rgba(0,25,45,0.96);border:1px solid rgba(0,207,255,0.28);border-radius:10px;padding:10px 18px;font-size:.78rem;color:var(--blue);letter-spacing:.07em;z-index:200;transition:transform .28s ease;backdrop-filter:blur(16px);white-space:nowrap;max-width:90vw;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.green{color:var(--wa);border-color:rgba(37,211,102,0.28);}
+#toast.red{color:var(--red);border-color:rgba(255,60,60,0.28);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">J.A.R.V.I.S</div>
+  <div class="subtitle">ULTIMATE PERSONAL AI SYSTEM</div>
+</header>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="hpill"><div class="bat"><div class="batf" id="batF" style="width:100%"></div></div><span id="batT">--%</span></div>
+  <div class="hpill">📶 <span id="netT">--</span></div>
+  <div class="hpill">📍 <span id="locT">--</span></div>
+  <div class="hpill">🌡 <span id="tempT">--</span></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="ntab active" onclick="goPage('home')">🏠 Home</button>
+  <button class="ntab" onclick="goPage('chat')">💬 Chat</button>
+  <button class="ntab" onclick="goPage('contacts')">📒 Contacts</button>
+  <button class="ntab" onclick="goPage('whatsapp')">💚 WhatsApp</button>
+  <button class="ntab" onclick="goPage('weather')">🌤 Weather</button>
+  <button class="ntab" onclick="goPage('tools')">🔧 Tools</button>
+  <button class="ntab" onclick="goPage('notes')">📝 Notes</button>
+  <button class="ntab" onclick="goPage('settings')">⚙ Settings</button>
+</nav>
+
+<main>
+
+<!-- ════ HOME ════ -->
+<div class="page active" id="page-home">
+  <div class="status-bar"><div class="sdot idle" id="sdot"></div><span id="stxt">SYSTEM READY</span></div>
+  <div class="ctrl">
+    <select class="lsel" id="langSel" onchange="changeLang()">
+      <option value="en-IN">🇮🇳 English (India)</option>
+      <option value="en-GB">🇬🇧 English (UK)</option>
+      <option value="en-US">🇺🇸 English (US)</option>
+      <option value="hi-IN">🇮🇳 हिन्दी</option>
+      <option value="ta-IN">🇮🇳 தமிழ்</option>
+      <option value="te-IN">🇮🇳 తెలుగు</option>
+      <option value="ml-IN">🇮🇳 മലയാളം</option>
+      <option value="kn-IN">🇮🇳 ಕನ್ನಡ</option>
+      <option value="bn-IN">🇮🇳 বাংলা</option>
+      <option value="mr-IN">🇮🇳 मराठी</option>
+      <option value="gu-IN">🇮🇳 ગુજરાતી</option>
+      <option value="pa-IN">🇮🇳 ਪੰਜਾਬੀ</option>
+      <option value="ur-PK">🇵🇰 اردو</option>
+      <option value="fr-FR">🇫🇷 Français</option>
+      <option value="de-DE">🇩🇪 Deutsch</option>
+      <option value="es-ES">🇪🇸 Español</option>
+      <option value="pt-BR">🇧🇷 Português</option>
+      <option value="it-IT">🇮🇹 Italiano</option>
+      <option value="ja-JP">🇯🇵 日本語</option>
+      <option value="ko-KR">🇰🇷 한국어</option>
+      <option value="zh-CN">🇨🇳 中文(简)</option>
+      <option value="zh-TW">🇹🇼 中文(繁)</option>
+      <option value="ru-RU">🇷🇺 Русский</option>
+      <option value="ar-SA">🇸🇦 العربية</option>
+      <option value="tr-TR">🇹🇷 Türkçe</option>
+      <option value="vi-VN">🇻🇳 Tiếng Việt</option>
+      <option value="th-TH">🇹🇭 ภาษาไทย</option>
+      <option value="id-ID">🇮🇩 Bahasa Indonesia</option>
+      <option value="ms-MY">🇲🇾 Bahasa Melayu</option>
+      <option value="nl-NL">🇳🇱 Nederlands</option>
+      <option value="pl-PL">🇵🇱 Polski</option>
+      <option value="sv-SE">🇸🇪 Svenska</option>
+    </select>
+    <button class="mbtn" onclick="toggleMem()">🧠 MEMORY</button>
+  </div>
+  <div class="mempanel" id="memPanel">
+    <div class="card-title"><div class="dot"></div>JARVIS MEMORY</div>
+    <div class="memgrid" id="memGrid"></div>
+    <div class="frow">
+      <input class="finput" id="mkIn" placeholder="Key (e.g. name)" style="flex:1;"/>
+      <input class="finput" id="mvIn" placeholder="Value" style="flex:1;"/>
+      <button class="fbtn" onclick="saveMem()">SAVE</button>
+    </div>
+  </div>
+  <div class="orb-wrap">
+    <div class="orb" id="mainOrb" onclick="startVoice()">
+      <div class="oring"></div><div class="oring"></div><div class="oring"></div>
+      <div class="ocore">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+        <span>CORE</span>
+      </div>
+    </div>
+    <div class="tap-hint">TAP ORB OR MIC TO SPEAK</div>
+  </div>
+  <div class="qlabel">QUICK COMMANDS</div>
+  <div class="qrow">
+    <button class="qb" onclick="qcmd('What time is it?')">🕐 Time</button>
+    <button class="qb" onclick="qcmd('Tell me a joke')">😄 Joke</button>
+    <button class="qb" onclick="qcmd('Give me a motivational quote')">💡 Quote</button>
+    <button class="qb" onclick="checkBat()">🔋 Battery</button>
+    <button class="qb" onclick="checkNet()">📶 Network</button>
+    <button class="qb" onclick="openRem()">⏰ Reminder</button>
+    <button class="qb g" onclick="goPage('whatsapp')">💬 WhatsApp</button>
+    <button class="qb g" onclick="goPage('contacts')">📒 Contacts</button>
+    <button class="qb p" onclick="goPage('tools')">🔧 Tools</button>
+    <button class="qb p" onclick="goPage('notes')">📝 Notes</button>
+    <button class="qb" onclick="goPage('weather')">🌤 Weather</button>
+    <button class="qb" onclick="qcmd('What can you do?')">🤖 Help</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>ACTIVE REMINDERS</div>
+    <div id="remList"><div class="empty">No reminders set</div></div>
+  </div>
+</div>
+
+<!-- ════ CHAT ════ -->
+<div class="page" id="page-chat">
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span class="card-title" style="margin:0;"><div class="dot"></div>COMM LOG</span>
+      <button class="fbtn" onclick="clearChat()" style="padding:4px 10px;font-size:.56rem;">CLEAR</button>
+    </div>
+    <div id="chatBox"><div class="msg sys"><div class="mb">JARVIS online. How can I assist you?</div></div></div>
+  </div>
+  <div class="irow">
+    <input class="tinput" id="txtIn" placeholder="Type a command..." onkeydown="if(event.key==='Enter')sendTxt()"/>
+    <button class="sbtn" onclick="sendTxt()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </div>
+</div>
+
+<!-- ════ CONTACTS ════ -->
+<div class="page" id="page-contacts">
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>ADD CONTACT</div>
+    <div class="frow">
+      <input class="finput" id="cNm" placeholder="Full Name" style="flex:1.2"/>
+      <input class="finput" id="cPh" placeholder="+91 number" type="tel" style="flex:1"/>
+      <button class="fbtn" onclick="addContact()">ADD</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>MY CONTACTS</div>
+    <input class="finput" id="cSrch" placeholder="🔍 Search contacts..." oninput="renderContacts()" style="margin-bottom:9px;"/>
+    <div id="contactList"><div class="empty">No contacts yet.</div></div>
+  </div>
+</div>
+
+<!-- ════ WHATSAPP ════ -->
+<div class="page" id="page-whatsapp">
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--wa)"></div>WHATSAPP</div>
+    <div class="watabs">
+      <button class="watab active" onclick="waTab('send')">📤 Send</button>
+      <button class="watab" onclick="waTab('group')">👥 Group</button>
+      <button class="watab" onclick="waTab('voice')">🎙 Voice Cmds</button>
+    </div>
+    <div class="wasec show" id="wa-send">
+      <div class="field"><span class="flabel">TO (Name from contacts or number)</span><input class="finput" id="waTo" placeholder="e.g. Mom or +919876543210"/></div>
+      <div class="field"><span class="flabel">MESSAGE</span><textarea class="finput" id="waMsg" rows="3" placeholder="Type your message..."></textarea></div>
+      <button class="fbtn green full" onclick="sendWA()">📤 OPEN IN WHATSAPP</button>
+    </div>
+    <div class="wasec" id="wa-group">
+      <div class="field"><span class="flabel">GROUP LINK (wa.me/g/...)</span><input class="finput" id="waGroup" placeholder="Paste WhatsApp group link"/></div>
+      <div class="field"><span class="flabel">MESSAGE (optional)</span><textarea class="finput" id="waGrpMsg" rows="2" placeholder="Message for the group..."></textarea></div>
+      <button class="fbtn green full" onclick="openGroup()">📤 OPEN GROUP IN WHATSAPP</button>
+    </div>
+    <div class="wasec" id="wa-voice">
+      <div class="vcmd">
+        <b>Say these voice commands:</b><br>
+        🎙 <b>"WhatsApp Mom I am on the way"</b><br>
+        🎙 <b>"Send WhatsApp to John hello buddy"</b><br>
+        🎙 <b>"Message Priya see you tomorrow"</b><br>
+        🎙 <b>"Call Dad"</b><br>
+        🎙 <b>"Text Ravi good morning"</b><br><br>
+        JARVIS matches the name to your saved contacts and opens WhatsApp instantly.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ WEATHER ════ -->
+<div class="page" id="page-weather">
+  <div class="card" id="wCard">
+    <div class="card-title"><div class="dot"></div>LIVE WEATHER</div>
+    <div class="wtop">
+      <div><div class="wcity" id="wCity">--</div><div class="wdesc" id="wDesc">--</div></div>
+      <div style="text-align:right"><div class="wtemp" id="wTemp">--</div><div class="wu">°C</div></div>
+    </div>
+    <div class="wgrid">
+      <div class="wstat"><span class="wslabel">FEELS LIKE</span><span class="wsval" id="wFeel">--</span></div>
+      <div class="wstat"><span class="wslabel">HUMIDITY</span><span class="wsval" id="wHum">--</span></div>
+      <div class="wstat"><span class="wslabel">WIND</span><span class="wsval" id="wWind">--</span></div>
+      <div class="wstat"><span class="wslabel">VISIBILITY</span><span class="wsval" id="wVis">--</span></div>
+      <div class="wstat"><span class="wslabel">PRESSURE</span><span class="wsval" id="wPres">--</span></div>
+      <div class="wstat"><span class="wslabel">SUNRISE</span><span class="wsval" id="wSun">--</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>SEARCH CITY</div>
+    <div class="frow">
+      <input class="finput" id="wCity2" placeholder="Enter city name..." onkeydown="if(event.key==='Enter')fetchWeather()" style="flex:1"/>
+      <button class="fbtn" onclick="fetchWeather()">GET</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TOOLS ════ -->
+<div class="page" id="page-tools">
+  <!-- Calculator -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>CALCULATOR</div>
+    <div class="calc">
+      <div class="calcdisp">
+        <div class="calcexpr" id="cExpr"></div>
+        <div class="calcres" id="cRes">0</div>
+      </div>
+      <div class="calcgrid">
+        <button class="ck sp" onclick="cc()">AC</button>
+        <button class="ck sp" onclick="cb()">⌫</button>
+        <button class="ck op" onclick="ci('%')">%</button>
+        <button class="ck op" onclick="ci('÷')">÷</button>
+        <button class="ck" onclick="ci('7')">7</button>
+        <button class="ck" onclick="ci('8')">8</button>
+        <button class="ck" onclick="ci('9')">9</button>
+        <button class="ck op" onclick="ci('×')">×</button>
+        <button class="ck" onclick="ci('4')">4</button>
+        <button class="ck" onclick="ci('5')">5</button>
+        <button class="ck" onclick="ci('6')">6</button>
+        <button class="ck op" onclick="ci('-')">−</button>
+        <button class="ck" onclick="ci('1')">1</button>
+        <button class="ck" onclick="ci('2')">2</button>
+        <button class="ck" onclick="ci('3')">3</button>
+        <button class="ck op" onclick="ci('+')">+</button>
+        <button class="ck" onclick="ci('0')" style="grid-column:span 2">0</button>
+        <button class="ck" onclick="ci('.')">.</button>
+        <button class="ck eq" onclick="ce()">=</button>
+      </div>
+    </div>
+  </div>
+  <!-- Timer -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>TIMER / STOPWATCH</div>
+    <div class="timerdisp" id="timerDisp">00:00:00</div>
+    <div class="trow">
+      <input class="finput tnum" id="thh" type="number" placeholder="HH" min="0" max="99"/>
+      <input class="finput tnum" id="tmm" type="number" placeholder="MM" min="0" max="59"/>
+      <input class="finput tnum" id="tss" type="number" placeholder="SS" min="0" max="59"/>
+      <button class="fbtn" onclick="startTimer()" style="flex:1" id="tStartBtn">START</button>
+      <button class="fbtn red" onclick="stopTimer()">STOP</button>
+    </div>
+    <div class="frow">
+      <button class="fbtn" onclick="startStopwatch()" style="flex:1" id="swBtn">⏱ STOPWATCH</button>
+      <button class="fbtn red" onclick="resetAll()">RESET</button>
+    </div>
+  </div>
+  <!-- Currency -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>CURRENCY CONVERTER</div>
+    <div class="currrow">
+      <div>
+        <span class="currlabel">FROM</span>
+        <select class="finput" id="cfrom">
+          <option value="USD">🇺🇸 USD</option><option value="EUR">🇪🇺 EUR</option>
+          <option value="INR" selected>🇮🇳 INR</option><option value="GBP">🇬🇧 GBP</option>
+          <option value="JPY">🇯🇵 JPY</option><option value="AED">🇦🇪 AED</option>
+          <option value="CAD">🇨🇦 CAD</option><option value="AUD">🇦🇺 AUD</option>
+          <option value="SGD">🇸🇬 SGD</option><option value="CNY">🇨🇳 CNY</option>
+          <option value="SAR">🇸🇦 SAR</option><option value="CHF">🇨🇭 CHF</option>
+          <option value="KRW">🇰🇷 KRW</option><option value="BRL">🇧🇷 BRL</option>
+          <option value="MYR">🇲🇾 MYR</option><option value="THB">🇹🇭 THB</option>
+        </select>
+      </div>
+      <div class="swap-icon" onclick="swapCurr()">⇄</div>
+      <div>
+        <span class="currlabel">TO</span>
+        <select class="finput" id="cto">
+          <option value="USD" selected>🇺🇸 USD</option><option value="EUR">🇪🇺 EUR</option>
+          <option value="INR">🇮🇳 INR</option><option value="GBP">🇬🇧 GBP</option>
+          <option value="JPY">🇯🇵 JPY</option><option value="AED">🇦🇪 AED</option>
+          <option value="CAD">🇨🇦 CAD</option><option value="AUD">🇦🇺 AUD</option>
+          <option value="SGD">🇸🇬 SGD</option><option value="CNY">🇨🇳 CNY</option>
+          <option value="SAR">🇸🇦 SAR</option><option value="CHF">🇨🇭 CHF</option>
+          <option value="KRW">🇰🇷 KRW</option><option value="BRL">🇧🇷 BRL</option>
+          <option value="MYR">🇲🇾 MYR</option><option value="THB">🇹🇭 THB</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <input class="finput" id="camount" type="number" placeholder="Amount" value="100" style="flex:1" onkeydown="if(event.key==='Enter')convertCurr()"/>
+      <button class="fbtn" onclick="convertCurr()">CONVERT</button>
+    </div>
+    <div class="currresult" id="currResult" style="display:none">
+      <div class="currval" id="currVal">--</div>
+      <div class="currsub" id="currSub">--</div>
+    </div>
+  </div>
+  <!-- Unit Converter -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>UNIT CONVERTER</div>
+    <div class="frow" style="margin-bottom:8px">
+      <select class="finput" id="utype" onchange="updateUnits()" style="flex:1">
+        <option value="length">📏 Length</option>
+        <option value="weight">⚖️ Weight</option>
+        <option value="temp">🌡 Temperature</option>
+        <option value="speed">💨 Speed</option>
+        <option value="area">📐 Area</option>
+        <option value="data">💾 Data</option>
+      </select>
+    </div>
+    <div class="frow" style="margin-bottom:8px">
+      <input class="finput" id="uval" type="number" placeholder="Value" style="flex:1" onkeydown="if(event.key==='Enter')convertUnit()"/>
+      <select class="finput" id="ufrom" style="flex:1"></select>
+      <select class="finput" id="uto" style="flex:1"></select>
+    </div>
+    <button class="fbtn full" onclick="convertUnit()">CONVERT</button>
+    <div class="currresult" id="unitResult" style="display:none;margin-top:8px">
+      <div class="currval" id="unitVal">--</div>
+      <div class="currsub" id="unitSub">--</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ NOTES ════ -->
+<div class="page" id="page-notes">
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--purple)"></div>NEW NOTE</div>
+    <div class="field"><textarea class="finput" id="noteIn" rows="3" placeholder='Type a note or say "Take a note: ..."'></textarea></div>
+    <button class="fbtn purple full" onclick="addNote()">💾 SAVE NOTE</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--purple)"></div>SAVED NOTES</div>
+    <div id="notesList"><div class="empty">No notes yet.</div></div>
+  </div>
+</div>
+
+<!-- ════ SETTINGS ════ -->
+<div class="page" id="page-settings">
+  <!-- API Key -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>CLAUDE API KEY</div>
+    <div class="frow">
+      <input class="finput" id="apiIn" type="password" placeholder="sk-ant-api03-..." style="flex:1"/>
+      <button class="fbtn" onclick="saveKey()">SAVE</button>
+    </div>
+    <div class="api-note">Get free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+    <div class="api-note" style="margin-top:4px;">Weather key from <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a> (free)</div>
+    <div class="frow" style="margin-top:8px">
+      <input class="finput" id="owmIn" type="password" placeholder="OpenWeatherMap API key..." style="flex:1"/>
+      <button class="fbtn" onclick="saveOWM()">SAVE</button>
+    </div>
+  </div>
+  <!-- Personality -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>JARVIS PERSONALITY</div>
+    <div class="pgrid" id="pgrid">
+      <div class="pcard active" onclick="setPersonality('jarvis')" data-p="jarvis"><span class="picon">🤖</span><div class="pname">JARVIS</div><div class="pdesc">Calm, witty, precise</div></div>
+      <div class="pcard" onclick="setPersonality('stark')" data-p="stark"><span class="picon">⚙️</span><div class="pname">Tony Stark</div><div class="pdesc">Sarcastic, brilliant</div></div>
+      <div class="pcard" onclick="setPersonality('friday')" data-p="friday"><span class="picon">👩‍💻</span><div class="pname">F.R.I.D.A.Y</div><div class="pdesc">Friendly, supportive</div></div>
+      <div class="pcard" onclick="setPersonality('zen')" data-p="zen"><span class="picon">🧘</span><div class="pname">Zen</div><div class="pdesc">Calm, philosophical</div></div>
+      <div class="pcard" onclick="setPersonality('professor')" data-p="professor"><span class="picon">🎓</span><div class="pname">Professor</div><div class="pdesc">Formal, educational</div></div>
+      <div class="pcard" onclick="setPersonality('buddy')" data-p="buddy"><span class="picon">🙌</span><div class="pname">Buddy</div><div class="pdesc">Casual, fun</div></div>
+    </div>
+  </div>
+  <!-- TTS Speed -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>VOICE SETTINGS</div>
+    <div class="field"><span class="flabel">SPEECH RATE</span>
+      <input type="range" min="0.5" max="2" step="0.1" id="rateSlider" value="0.95" oninput="document.getElementById('rateVal').textContent=parseFloat(this.value).toFixed(1)" style="width:100%;margin:6px 0"/>
+      <span class="flabel" id="rateVal">0.9</span>
+    </div>
+    <div class="field"><span class="flabel">SPEECH PITCH</span>
+      <input type="range" min="0.5" max="2" step="0.1" id="pitchSlider" value="0.85" oninput="document.getElementById('pitchVal').textContent=parseFloat(this.value).toFixed(1)" style="width:100%;margin:6px 0"/>
+      <span class="flabel" id="pitchVal">0.9</span>
+    </div>
+    <button class="fbtn full" onclick="testVoice()">🔊 TEST VOICE</button>
+  </div>
+  <!-- Danger Zone -->
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--red)"></div>RESET</div>
+    <div class="frow">
+      <button class="fbtn red" onclick="clearMem()" style="flex:1">CLEAR MEMORY</button>
+      <button class="fbtn red" onclick="clearContacts()" style="flex:1">CLEAR CONTACTS</button>
+    </div>
+    <button class="fbtn red full" style="margin-top:6px" onclick="clearAll()">FACTORY RESET</button>
+  </div>
+</div>
+
+</main>
+
+<!-- MIC -->
+<div class="botbar">
+  <button id="micBtn" onclick="startVoice()">
+    <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+  </button>
+</div>
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════
+//  INIT STATE
+// ════════════════════════════════════════════════
+let apiKey    = localStorage.getItem('j_api') || '';
+let owmKey    = localStorage.getItem('j_owm') || 'bd5e378503939ddaee76f12ad7a97608';
+let lang      = localStorage.getItem('j_lang') || 'en-IN';
+let memory    = JSON.parse(localStorage.getItem('j_mem') || '{}');
+let contacts  = JSON.parse(localStorage.getItem('j_contacts') || '[]');
+let notes     = JSON.parse(localStorage.getItem('j_notes') || '[]');
+let personality = localStorage.getItem('j_personality') || 'jarvis';
+let convHist  = [];
+let reminders = [];
+let isListening = false;
+let recognition = null;
+let timerInterval = null, swInterval = null;
+let timerRemaining = 0, swElapsed = 0, timerRunning = false, swRunning = false;
+let calcExpr = '', calcResult = '0';
+
+// INIT UI
+if (apiKey) document.getElementById('apiIn').value = apiKey;
+if (owmKey && owmKey !== 'bd5e378503939ddaee76f12ad7a97608') document.getElementById('owmIn').value = owmKey;
+document.getElementById('langSel').value = lang;
+setPersonalityUI(personality);
+renderMemGrid(); renderContacts(); renderNotes();
+updateUnits();
+
+// ════════════════════════════════════════════════
+//  PAGE NAVIGATION
+// ════════════════════════════════════════════════
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const tabs = document.querySelectorAll('.ntab');
+  const map = {home:0,chat:1,contacts:2,whatsapp:3,weather:4,tools:5,notes:6,settings:7};
+  if (map[name] !== undefined) tabs[map[name]].classList.add('active');
+  if (name === 'weather' && !document.getElementById('wCity').textContent.includes(',')) {
+    const city = memory['city'];
+    if (city) { document.getElementById('wCity2').value = city; fetchWeather(); }
+  }
+}
+
+// ════════════════════════════════════════════════
+//  LANGUAGE
+// ════════════════════════════════════════════════
+function changeLang() {
+  lang = document.getElementById('langSel').value;
+  localStorage.setItem('j_lang', lang);
+  const lbl = document.getElementById('langSel').selectedOptions[0].text;
+  toast(`Language: ${lbl}`);
+  addMsg('sys', `Language set to ${lbl}.`);
+}
+
+const langNames = {
+  'en-IN':'English','en-GB':'English','en-US':'English',
+  'hi-IN':'Hindi','ta-IN':'Tamil','te-IN':'Telugu','ml-IN':'Malayalam',
+  'kn-IN':'Kannada','bn-IN':'Bengali','mr-IN':'Marathi','gu-IN':'Gujarati',
+  'pa-IN':'Punjabi','ur-PK':'Urdu','fr-FR':'French','de-DE':'German',
+  'es-ES':'Spanish','pt-BR':'Portuguese','it-IT':'Italian','ja-JP':'Japanese',
+  'ko-KR':'Korean','zh-CN':'Chinese','zh-TW':'Chinese','ru-RU':'Russian',
+  'ar-SA':'Arabic','tr-TR':'Turkish','vi-VN':'Vietnamese','th-TH':'Thai',
+  'id-ID':'Indonesian','ms-MY':'Malay','nl-NL':'Dutch','pl-PL':'Polish','sv-SE':'Swedish'
+};
+
+// ════════════════════════════════════════════════
+//  MEMORY
+// ════════════════════════════════════════════════
+function toggleMem() { document.getElementById('memPanel').classList.toggle('show'); }
+
+function saveMem() {
+  const k = document.getElementById('mkIn').value.trim().toLowerCase();
+  const v = document.getElementById('mvIn').value.trim();
+  if (!k || !v) { toast('Fill both fields','red'); return; }
+  memory[k] = v; persistMem();
+  document.getElementById('mkIn').value = '';
+  document.getElementById('mvIn').value = '';
+  toast('✓ Remembered: ' + k, 'green');
+}
+
+function delMem(k) { delete memory[k]; persistMem(); }
+function clearMem() { if (confirm('Clear all memory?')) { memory = {}; persistMem(); toast('Memory cleared'); } }
+
+function persistMem() {
+  localStorage.setItem('j_mem', JSON.stringify(memory));
+  renderMemGrid();
+}
+
+function renderMemGrid() {
+  const g = document.getElementById('memGrid');
+  const keys = Object.keys(memory);
+  if (!keys.length) { g.innerHTML = '<div style="color:var(--muted);font-size:.74rem;grid-column:span 2;padding:3px 0 7px;">Tell me your name, city, etc. and I\'ll remember.</div>'; return; }
+  g.innerHTML = keys.map(k => `<div class="memitem"><span class="memk">${k.toUpperCase()}</span><span class="memv">${memory[k]}</span><span class="memf" onclick="delMem('${k}')">✕ forget</span></div>`).join('');
+}
+
+function buildMemCtx() {
+  const keys = Object.keys(memory);
+  if (!keys.length) return '';
+  return '\n\nUser context: ' + keys.map(k => `${k}: ${memory[k]}`).join(', ') + '.';
+}
+
+function autoLearn(text) {
+  const l = text.toLowerCase();
+  const nm = l.match(/(?:my name is|i am|i'm|call me)\s+([a-zA-Z]+)/i);
+  if (nm) { memory['name'] = nm[1]; persistMem(); }
+  const cm = l.match(/(?:i live in|i'm from|i am from|my city is)\s+([a-zA-Z\s]+?)(?:\.|,|$)/i);
+  if (cm && cm[1].trim().length > 1) { memory['city'] = cm[1].trim(); persistMem(); }
+  const agm = l.match(/i am (\d+) years old/i);
+  if (agm) { memory['age'] = agm[1]; persistMem(); }
+}
+
+// ════════════════════════════════════════════════
+//  PERSONALITY
+// ════════════════════════════════════════════════
+const personalities = {
+  jarvis: 'You are JARVIS, a sophisticated personal AI assistant inspired by Iron Man. Be calm, precise, slightly witty. 2-4 sentences max.',
+  stark: 'You are Tony Stark\'s AI, with his sarcastic, brilliant persona. Be clever, confident, and occasionally sarcastic. 2-4 sentences.',
+  friday: 'You are F.R.I.D.A.Y., a warm and supportive AI assistant. Be friendly, encouraging, and helpful. 2-4 sentences.',
+  zen: 'You are a zen AI guide. Be calm, thoughtful, philosophical. Use metaphors sometimes. 2-4 sentences.',
+  professor: 'You are an educated AI professor. Be formal, informative, structured. Use proper language. 2-4 sentences.',
+  buddy: 'You are a casual, fun AI buddy. Be relaxed, use casual language, add humour. 2-4 sentences.'
+};
+
+function setPersonality(p) {
+  personality = p;
+  localStorage.setItem('j_personality', p);
+  setPersonalityUI(p);
+  toast('Personality: ' + p, 'green');
+}
+
+function setPersonalityUI(p) {
+  document.querySelectorAll('.pcard').forEach(c => c.classList.toggle('active', c.dataset.p === p));
+}
+
+// ════════════════════════════════════════════════
+//  HUD: BATTERY, NETWORK, LOCATION
+// ════════════════════════════════════════════════
+async function initBattery() {
+  if (!('getBattery' in navigator)) { document.getElementById('batT').textContent = 'N/A'; return; }
+  try {
+    const b = await navigator.getBattery();
+    const upd = () => {
+      const p = Math.round(b.level * 100);
+      document.getElementById('batT').textContent = p + '%' + (b.charging ? '⚡' : '');
+      const f = document.getElementById('batF');
+      f.style.width = p + '%';
+      f.style.background = p > 50 ? 'var(--green)' : p > 20 ? 'var(--yellow)' : 'var(--red)';
+    };
+    upd(); b.addEventListener('levelchange', upd); b.addEventListener('chargingchange', upd);
+  } catch(e) { document.getElementById('batT').textContent = 'N/A'; }
+}
+
+function initNetwork() {
+  const upd = () => {
+    const el = document.getElementById('netT');
+    if (!navigator.onLine) { el.textContent = 'Offline'; el.style.color = 'var(--red)'; return; }
+    const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    el.textContent = c ? (c.effectiveType || c.type || 'Online').toUpperCase() : 'Online';
+    el.style.color = 'var(--green)';
+  };
+  upd(); window.addEventListener('online', upd); window.addEventListener('offline', upd);
+}
+
+function initLocation() {
+  if (!('geolocation' in navigator)) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`)
+      .then(r => r.json()).then(d => {
+        const city = d.address.city || d.address.town || d.address.village || '';
+        if (city) {
+          document.getElementById('locT').textContent = city;
+          if (!memory['city']) { memory['city'] = city; persistMem(); }
+        }
+      }).catch(() => {});
+  }, () => {});
+}
+
+function checkBat() {
+  if ('getBattery' in navigator) {
+    navigator.getBattery().then(b => {
+      const p = Math.round(b.level * 100);
+      const r = `Battery is at ${p}%, ${b.charging ? 'currently charging ⚡' : 'discharging'}.`;
+      addMsg('jarvis', r); speak(r); goPage('chat');
+    });
+  } else say('Battery info not available on this browser.');
+}
+
+function checkNet() {
+  const c = navigator.connection || {};
+  const t = c.effectiveType || (navigator.onLine ? 'Online' : 'Offline');
+  const dl = c.downlink ? ` Speed ~${c.downlink} Mbps.` : '';
+  say(`Network: ${t}. You are ${navigator.onLine ? 'connected' : 'offline'}.${dl}`);
+}
+
+function say(text) { addMsg('jarvis', text); speak(text); goPage('chat'); }
+
+// ════════════════════════════════════════════════
+//  WEATHER
+// ════════════════════════════════════════════════
+async function fetchWeather() {
+  const city = document.getElementById('wCity2').value.trim();
+  if (!city) { toast('Enter a city name', 'red'); return; }
+  toast('Fetching weather...');
+  try {
+    const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${owmKey}&units=metric`);
+    const d = await r.json();
+    if (d.cod !== 200) throw new Error(d.message);
+    document.getElementById('wCity').textContent = `${d.name}, ${d.sys.country}`;
+    document.getElementById('wDesc').textContent = d.weather[0].description;
+    document.getElementById('wTemp').textContent = Math.round(d.main.temp);
+    document.getElementById('wFeel').textContent = Math.round(d.main.feels_like) + '°C';
+    document.getElementById('wHum').textContent = d.main.humidity + '%';
+    document.getElementById('wWind').textContent = Math.round(d.wind.speed * 3.6) + ' km/h';
+    document.getElementById('wVis').textContent = d.visibility ? (d.visibility / 1000).toFixed(1) + ' km' : '--';
+    document.getElementById('wPres').textContent = d.main.pressure + ' hPa';
+    const sr = new Date(d.sys.sunrise * 1000);
+    document.getElementById('wSun').textContent = sr.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('tempT').textContent = Math.round(d.main.temp) + '°C';
+    const rep = `In ${d.name}, it's ${Math.round(d.main.temp)}°C with ${d.weather[0].description}. Humidity ${d.main.humidity}%, wind ${Math.round(d.wind.speed*3.6)} km/h.`;
+    addMsg('jarvis', rep); speak(rep);
+  } catch(e) {
+    toast('Weather error: ' + e.message, 'red');
+    addMsg('sys', '⚠ Could not fetch weather. Check city name or API key.');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  CONTACTS
+// ════════════════════════════════════════════════
+function addContact() {
+  const name = document.getElementById('cNm').value.trim();
+  const num  = document.getElementById('cPh').value.trim().replace(/\s+/g,'');
+  if (!name || !num) { toast('Enter name and number','red'); return; }
+  contacts.push({id:Date.now(), name, num});
+  saveContacts();
+  document.getElementById('cNm').value = '';
+  document.getElementById('cPh').value = '';
+  toast('✓ Contact saved: ' + name, 'green');
+}
+
+function delContact(id) { contacts = contacts.filter(c => c.id !== id); saveContacts(); }
+function clearContacts() { if (confirm('Clear all contacts?')) { contacts = []; saveContacts(); toast('Contacts cleared'); } }
+
+function saveContacts() {
+  localStorage.setItem('j_contacts', JSON.stringify(contacts));
+  renderContacts();
+}
+
+function renderContacts() {
+  const list = document.getElementById('contactList');
+  const q = (document.getElementById('cSrch')?.value || '').toLowerCase();
+  const f = q ? contacts.filter(c => c.name.toLowerCase().includes(q) || c.num.includes(q)) : contacts;
+  if (!f.length) { list.innerHTML = `<div class="empty">${contacts.length ? 'No match.' : 'No contacts yet.'}</div>`; return; }
+  list.innerHTML = f.map(c => `
+    <div class="ci">
+      <div class="cav">${c.name[0].toUpperCase()}</div>
+      <div class="cinfo"><div class="cname">${c.name}</div><div class="cnum">${c.num}</div></div>
+      <div class="cact">
+        <button class="cab call" title="Call" onclick="callNum('${c.num}')">📞</button>
+        <button class="cab wa" title="WhatsApp" onclick="openWATo('${c.num}','')">💬</button>
+        <button class="cab del" title="Delete" onclick="delContact(${c.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function findContact(name) {
+  const l = name.toLowerCase().trim();
+  return contacts.find(c => c.name.toLowerCase().includes(l) || l.includes(c.name.toLowerCase()));
+}
+
+function callNum(num) { window.location.href = 'tel:' + num; }
+
+function openWATo(num, msg) {
+  const clean = num.replace(/[^0-9+]/g,'');
+  window.open(`https://wa.me/${clean}${msg ? '?text=' + encodeURIComponent(msg) : ''}`, '_blank');
+}
+
+// ════════════════════════════════════════════════
+//  WHATSAPP
+// ════════════════════════════════════════════════
+function waTab(t) {
+  document.querySelectorAll('.wasec').forEach(s => s.classList.remove('show'));
+  document.querySelectorAll('.watab').forEach(b => b.classList.remove('active'));
+  document.getElementById('wa-' + t).classList.add('show');
+  const tabs = document.querySelectorAll('.watab');
+  const idx = {send:0,group:1,voice:2}[t];
+  tabs[idx].classList.add('active');
+}
+
+function sendWA() {
+  const to  = document.getElementById('waTo').value.trim();
+  const msg = document.getElementById('waMsg').value.trim();
+  if (!to) { toast('Enter recipient','red'); return; }
+  const c = findContact(to);
+  if (c) { openWATo(c.num, msg); addMsg('wamsg', `📤 WhatsApp → ${c.name}: "${msg||'(no message)'}"`); return; }
+  if (/^\+?[\d\s\-]{7,15}$/.test(to)) { openWATo(to, msg); addMsg('wamsg', `📤 WhatsApp → ${to}`); return; }
+  toast('Contact not found. Add them first.','red');
+  addMsg('sys', `⚠ No contact named "${to}". Add them in Contacts.`);
+}
+
+function openGroup() {
+  const link = document.getElementById('waGroup').value.trim();
+  const msg  = document.getElementById('waGrpMsg').value.trim();
+  if (!link) { toast('Enter group link','red'); return; }
+  const url = msg ? link + (link.includes('?') ? '&' : '?') + 'text=' + encodeURIComponent(msg) : link;
+  window.open(url, '_blank');
+}
+
+function handleWAVoice(text) {
+  const patterns = [
+    /(?:whatsapp|send whatsapp to|message|msg|text)\s+([a-zA-Z]+)\s+(.*)/i,
+    /(?:send a message to)\s+([a-zA-Z]+)\s+(.*)/i,
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) {
+      const name = m[1].trim(), msg = m[2].trim();
+      const c = findContact(name);
+      if (c) { openWATo(c.num, msg); const r=`Opening WhatsApp to send "${msg}" to ${c.name}.`; addMsg('wamsg','📤 '+r); speak(r); }
+      else { const r=`I couldn't find ${name} in your contacts.`; addMsg('sys','⚠ '+r); speak(r); }
+      return true;
+    }
+  }
+  return false;
+}
+
+function handleCallVoice(text) {
+  const m = text.match(/^call\s+([a-zA-Z\s]+)/i);
+  if (m) {
+    const name = m[1].trim();
+    const c = findContact(name);
+    if (c) { const r=`Calling ${c.name}...`; addMsg('jarvis',r); speak(r); setTimeout(() => callNum(c.num), 1200); }
+    else { const r=`No contact named ${name}.`; addMsg('sys','⚠ '+r); speak(r); }
+    return true;
+  }
+  return false;
+}
+
+// ════════════════════════════════════════════════
+//  NOTES
+// ════════════════════════════════════════════════
+function addNote(text) {
+  const t = text || document.getElementById('noteIn').value.trim();
+  if (!t) { toast('Write something first','red'); return; }
+  notes.unshift({id:Date.now(), text:t, time: new Date().toLocaleString()});
+  localStorage.setItem('j_notes', JSON.stringify(notes));
+  if (!text) document.getElementById('noteIn').value = '';
+  renderNotes(); toast('✓ Note saved','green');
+}
+
+function delNote(id) { notes = notes.filter(n => n.id !== id); localStorage.setItem('j_notes', JSON.stringify(notes)); renderNotes(); }
+
+function renderNotes() {
+  const list = document.getElementById('notesList');
+  if (!notes.length) { list.innerHTML = '<div class="empty">No notes yet.</div>'; return; }
+  list.innerHTML = notes.map(n => `
+    <div class="nitem">
+      <span class="ntime">${n.time}</span>
+      <div class="ntext">${n.text}</div>
+      <span class="ndel" onclick="delNote(${n.id})">✕ delete</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  REMINDERS
+// ════════════════════════════════════════════════
+function openRem() {
+  const t = prompt('Remind me in how many minutes?');
+  if (!t || isNaN(t)) return;
+  const m = prompt('What should I remind you about?');
+  if (!m) return;
+  addRemTimer(parseInt(t), m);
+}
+
+function handleRemVoice(text) {
+  const mm = text.match(/(\d+)\s*min/i);
+  const hh = text.match(/(\d+)\s*hour/i);
+  const mins = mm ? parseInt(mm[1]) : hh ? parseInt(hh[1])*60 : 5;
+  const r = `Reminder set for ${mins} minute${mins!==1?'s':''}.`;
+  addMsg('jarvis',r); speak(r); addRemTimer(mins, text);
+}
+
+function addRemTimer(mins, text) {
+  const id = Date.now();
+  reminders.push({id,text,mins}); renderRems(); toast(`⏰ Reminder: ${mins}m`);
+  setTimeout(()=>{
+    toast('⏰ '+text.slice(0,40));
+    addMsg('sys',`⏰ REMINDER: ${text}`);
+    speak('Reminder: '+text);
+    if (navigator.vibrate) navigator.vibrate([300,100,300,100,300]);
+    reminders = reminders.filter(r=>r.id!==id); renderRems();
+  }, mins*60000);
+}
+
+function renderRems() {
+  const list = document.getElementById('remList');
+  if (!reminders.length) { list.innerHTML='<div class="empty">No reminders</div>'; return; }
+  list.innerHTML = reminders.map(r=>`
+    <div class="ritem">
+      <span>⏰ ${r.text.length>32?r.text.slice(0,32)+'…':r.text} (${r.mins}m)</span>
+      <button class="rdel" onclick="delRem(${r.id})">✕</button>
+    </div>`).join('');
+}
+function delRem(id) { reminders = reminders.filter(r=>r.id!==id); renderRems(); }
+
+// ════════════════════════════════════════════════
+//  CALCULATOR
+// ════════════════════════════════════════════════
+function ci(v) {
+  calcExpr += v;
+  document.getElementById('cExpr').textContent = calcExpr;
+  try {
+    const expr = calcExpr.replace(/÷/g,'/').replace(/×/g,'*').replace(/%/g,'/100');
+    const r = Function('"use strict";return('+expr+')')();
+    if (!isNaN(r) && isFinite(r)) { calcResult = +r.toFixed(10)+''; document.getElementById('cRes').textContent = calcResult; }
+  } catch(e) {}
+}
+function cc() { calcExpr=''; calcResult='0'; document.getElementById('cExpr').textContent=''; document.getElementById('cRes').textContent='0'; }
+function cb() { calcExpr=calcExpr.slice(0,-1); document.getElementById('cExpr').textContent=calcExpr; }
+function ce() {
+  try {
+    const expr = calcExpr.replace(/÷/g,'/').replace(/×/g,'*').replace(/%/g,'/100');
+    const r = Function('"use strict";return('+expr+')')();
+    if (!isNaN(r) && isFinite(r)) {
+      const res = +r.toFixed(10)+'';
+      document.getElementById('cExpr').textContent = calcExpr + ' =';
+      document.getElementById('cRes').textContent = res;
+      calcExpr = res; calcResult = res;
+    }
+  } catch(e) { document.getElementById('cRes').textContent = 'Error'; calcExpr=''; }
+}
+
+// ════════════════════════════════════════════════
+//  TIMER / STOPWATCH
+// ════════════════════════════════════════════════
+function fmtTime(s) {
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+  return [h,m,ss].map(n=>String(n).padStart(2,'0')).join(':');
+}
+
+function startTimer() {
+  const h=parseInt(document.getElementById('thh').value)||0;
+  const m=parseInt(document.getElementById('tmm').value)||0;
+  const s=parseInt(document.getElementById('tss').value)||0;
+  timerRemaining = h*3600+m*60+s;
+  if (!timerRemaining) { toast('Set a time first','red'); return; }
+  clearInterval(timerInterval);
+  timerRunning = true;
+  document.getElementById('timerDisp').className='timerdisp running';
+  timerInterval = setInterval(()=>{
+    timerRemaining--;
+    document.getElementById('timerDisp').textContent = fmtTime(timerRemaining);
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval); timerRunning=false;
+      document.getElementById('timerDisp').className='timerdisp expired';
+      speak('Timer complete!'); toast('⏰ Timer done!');
+      if (navigator.vibrate) navigator.vibrate([500,200,500]);
+    }
+  }, 1000);
+}
+
+function startStopwatch() {
+  if (swRunning) { clearInterval(swInterval); swRunning=false; document.getElementById('swBtn').textContent='⏱ STOPWATCH'; return; }
+  swRunning=true; document.getElementById('swBtn').textContent='⏸ PAUSE';
+  swInterval = setInterval(()=>{ swElapsed++; document.getElementById('timerDisp').textContent=fmtTime(swElapsed); },1000);
+}
+
+function stopTimer() { clearInterval(timerInterval); clearInterval(swInterval); timerRunning=swRunning=false; document.getElementById('swBtn').textContent='⏱ STOPWATCH'; document.getElementById('timerDisp').className='timerdisp'; }
+
+function resetAll() { stopTimer(); timerRemaining=swElapsed=0; document.getElementById('timerDisp').textContent='00:00:00'; ['thh','tmm','tss'].forEach(id=>document.getElementById(id).value=''); }
+
+// ════════════════════════════════════════════════
+//  CURRENCY CONVERTER
+// ════════════════════════════════════════════════
+async function convertCurr() {
+  const from = document.getElementById('cfrom').value;
+  const to   = document.getElementById('cto').value;
+  const amt  = parseFloat(document.getElementById('camount').value);
+  if (isNaN(amt)) { toast('Enter a valid amount','red'); return; }
+  toast('Fetching rates...');
+  try {
+    const r = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`);
+    const d = await r.json();
+    const rate = d.rates[to];
+    const result = (amt * rate).toFixed(2);
+    document.getElementById('currResult').style.display='block';
+    document.getElementById('currVal').textContent = `${result} ${to}`;
+    document.getElementById('currSub').textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    toast('✓ Converted','green');
+  } catch(e) {
+    toast('Rate fetch failed','red');
+    document.getElementById('currResult').style.display='none';
+  }
+}
+
+function swapCurr() {
+  const f=document.getElementById('cfrom'), t=document.getElementById('cto');
+  [f.value,t.value]=[t.value,f.value];
+}
+
+// ════════════════════════════════════════════════
+//  UNIT CONVERTER
+// ════════════════════════════════════════════════
+const unitData = {
+  length:{units:['m','km','cm','mm','mile','yard','foot','inch','nautical mile'],factors:{m:1,km:1000,cm:.01,mm:.001,mile:1609.34,yard:.9144,foot:.3048,inch:.0254,'nautical mile':1852}},
+  weight:{units:['kg','g','mg','lb','oz','ton','stone'],factors:{kg:1,g:.001,mg:0.000001,lb:.453592,oz:.0283495,ton:1000,stone:6.35029}},
+  temp:{units:['Celsius','Fahrenheit','Kelvin'],factors:{}},
+  speed:{units:['m/s','km/h','mph','knot','ft/s'],factors:{'m/s':1,'km/h':1/3.6,mph:0.44704,knot:0.514444,'ft/s':0.3048}},
+  area:{units:['m²','km²','cm²','ft²','acre','hectare'],factors:{'m²':1,'km²':1e6,'cm²':.0001,'ft²':.092903,acre:4046.86,hectare:10000}},
+  data:{units:['Byte','KB','MB','GB','TB'],factors:{Byte:1,KB:1024,MB:1048576,GB:1073741824,TB:1099511627776}}
+};
+
+function updateUnits() {
+  const t = document.getElementById('utype').value;
+  const d = unitData[t];
+  ['ufrom','uto'].forEach(id=>{
+    const sel=document.getElementById(id); sel.innerHTML='';
+    d.units.forEach(u=>{ const o=document.createElement('option'); o.value=u; o.textContent=u; sel.appendChild(o); });
+  });
+  document.getElementById('uto').selectedIndex=1;
+}
+
+function convertUnit() {
+  const type=document.getElementById('utype').value;
+  const val=parseFloat(document.getElementById('uval').value);
+  const from=document.getElementById('ufrom').value;
+  const to=document.getElementById('uto').value;
+  if (isNaN(val)) { toast('Enter a value','red'); return; }
+  let result;
+  if (type==='temp') {
+    if (from==='Celsius'&&to==='Fahrenheit') result=val*9/5+32;
+    else if (from==='Fahrenheit'&&to==='Celsius') result=(val-32)*5/9;
+    else if (from==='Celsius'&&to==='Kelvin') result=val+273.15;
+    else if (from==='Kelvin'&&to==='Celsius') result=val-273.15;
+    else if (from==='Fahrenheit'&&to==='Kelvin') result=(val-32)*5/9+273.15;
+    else if (from==='Kelvin'&&to==='Fahrenheit') result=(val-273.15)*9/5+32;
+    else result=val;
+  } else {
+    const f=unitData[type].factors;
+    result=val*f[from]/f[to];
+  }
+  document.getElementById('unitResult').style.display='block';
+  document.getElementById('unitVal').textContent=`${+result.toFixed(6)} ${to}`;
+  document.getElementById('unitSub').textContent=`${val} ${from} = ${+result.toFixed(6)} ${to}`;
+}
+
+// ════════════════════════════════════════════════
+//  STATUS / TOAST / ORB
+// ════════════════════════════════════════════════
+function setStatus(text, mode) {
+  document.getElementById('stxt').textContent = text;
+  const d = document.getElementById('sdot');
+  d.className = 'sdot';
+  if (mode==='idle') d.classList.add('idle');
+  if (mode==='red')  d.classList.add('red');
+}
+
+let toastTimer;
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show' + (type ? ' '+type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function setOrb(state) {
+  const o=document.getElementById('mainOrb'), m=document.getElementById('micBtn');
+  o.className='orb'; m.className='';
+  if (state==='listening'){o.classList.add('listening');m.classList.add('listening');}
+  if (state==='thinking') {o.classList.add('thinking'); m.classList.add('thinking');}
+  if (state==='speaking') {o.classList.add('speaking'); m.classList.add('speaking');}
+}
+
+function saveKey() {
+  const k=document.getElementById('apiIn').value.trim();
+  if (!k){toast('Enter key','red');return;}
+  apiKey=k; localStorage.setItem('j_api',k); toast('✓ API key saved','green'); setStatus('SYSTEM ONLINE','active');
+}
+
+function saveOWM() {
+  const k=document.getElementById('owmIn').value.trim();
+  if (!k){toast('Enter OWM key','red');return;}
+  owmKey=k; localStorage.setItem('j_owm',k); toast('✓ Weather key saved','green');
+}
+
+function clearAll() { if(confirm('Factory reset? ALL data will be deleted.')){localStorage.clear();location.reload();} }
+
+// ════════════════════════════════════════════════
+//  CHAT
+// ════════════════════════════════════════════════
+function addMsg(role, text) {
+  const box=document.getElementById('chatBox');
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  const labels={user:'YOU',jarvis:'JARVIS',sys:'SYSTEM',wamsg:'WHATSAPP',errmsg:'ERROR'};
+  div.innerHTML=`<div class="mlabel">${labels[role]||'JARVIS'}</div><div class="mb">${text}</div>`;
+  box.appendChild(div); box.scrollTop=box.scrollHeight;
+}
+
+function addTyping() {
+  const box=document.getElementById('chatBox');
+  const div=document.createElement('div');
+  div.className='msg jarvis'; div.id='tMsg';
+  div.innerHTML=`<div class="mlabel">JARVIS</div><div class="mb"><div class="tdots"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(div); box.scrollTop=box.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('tMsg');if(t)t.remove();}
+
+function clearChat() {
+  document.getElementById('chatBox').innerHTML='<div class="msg sys"><div class="mb">Chat cleared.</div></div>';
+  convHist=[];
+}
+
+// ════════════════════════════════════════════════
+//  JARVIS BRAIN
+// ════════════════════════════════════════════════
+async function askJarvis(userText) {
+  if (!apiKey) { addMsg('sys','⚠ Enter your Claude API key in Settings.'); goPage('settings'); return; }
+
+  autoLearn(userText);
+  const low = userText.toLowerCase().trim();
+
+  // ── LOCAL COMMANDS ──
+  if (low.match(/\b(time|समय|நேரம்|وقت|temps)\b/) && low.match(/\b(what|current|now|क्या|என்ன)\b/)) {
+    say(`The current time is ${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:true})}.`); return;
+  }
+  if (low.match(/\b(date|today|आज|இன்று|aujourd'hui)\b/)) {
+    say(`Today is ${new Date().toLocaleDateString([],{weekday:'long',year:'numeric',month:'long',day:'numeric'})}.`); return;
+  }
+  if (low.match(/\b(battery|बैटरी|பேட்டரி)\b/)) { checkBat(); return; }
+  if (low.match(/\b(network|internet|wifi|connection|online|signal)\b/)) { checkNet(); return; }
+  if (low.match(/\b(weather|मौसम|வானிலை|forecast|temperature|clima)\b/)) {
+    goPage('weather');
+    const city=document.getElementById('wCity2').value.trim()||memory['city'];
+    if(city){document.getElementById('wCity2').value=city;fetchWeather();}
+    else addMsg('jarvis','Opening weather. Enter a city name.');
+    return;
+  }
+  if (low.match(/\b(remind|reminder|याद|நினைவ்)\b/)) { handleRemVoice(userText); return; }
+  if (low.match(/^(?:whatsapp|message|msg|text)\s+\w/) && !low.startsWith('what')) { if(handleWAVoice(userText)) return; }
+  if (low.startsWith('call ')) { if(handleCallVoice(userText)) return; }
+  if (low.match(/^(?:note|take a note|save note)[:\s]+(.+)/i)) {
+    const m=userText.match(/^(?:note|take a note|save note)[:\s]+(.+)/i);
+    if(m){addNote(m[1].trim());say('Note saved.');return;}
+  }
+  if (low.match(/\b(calculate|compute|what is \d|eval)\b/)) {
+    goPage('tools');
+  }
+
+  // ── CLAUDE API ──
+  setOrb('thinking'); setStatus('PROCESSING...','active'); addTyping(); goPage('chat');
+  convHist.push({role:'user',content:userText});
+
+  const resLang = langNames[lang] || 'English';
+  const cCtx = contacts.length ? `\nSaved contacts: ${contacts.map(c=>c.name).join(', ')}.` : '';
+  const sysPrompt = `${personalities[personality]||personalities.jarvis} ALWAYS respond in ${resLang}.${buildMemCtx()}${cCtx}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1024,system:sysPrompt,messages:convHist})
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.content[0].text;
+    convHist.push({role:'assistant',content:reply});
+    removeTyping(); addMsg('jarvis',reply); speak(reply);
+    setOrb('idle'); setStatus('READY','active');
+  } catch(err) {
+    removeTyping();
+    addMsg('errmsg','⚠ Error: '+(err.message||'Could not reach JARVIS.'));
+    setOrb('idle'); setStatus('ERROR','red');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  VOICE INPUT
+// ════════════════════════════════════════════════
+function startVoice() {
+  if (isListening) return stopVoice();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Voice needs Chrome','red'); return; }
+  recognition = new SR();
+  recognition.lang = lang;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onstart = () => {
+    isListening=true; setOrb('listening'); setStatus('LISTENING...','active');
+    document.getElementById('mainOrb').classList.add('listening');
+  };
+  recognition.onresult = e => {
+    const t=e.results[0][0].transcript;
+    addMsg('user',t); askJarvis(t);
+  };
+  recognition.onerror = () => { toast('Could not hear you','red'); stopVoice(); };
+  recognition.onend = () => stopVoice();
+  recognition.start();
+}
+
+function stopVoice() {
+  isListening=false; if(recognition)recognition.stop();
+  setOrb('idle'); setStatus('PROCESSING...','active');
+  document.getElementById('mainOrb').classList.remove('listening');
+}
+
+// ════════════════════════════════════════════════
+//  TEXT-TO-SPEECH
+// ════════════════════════════════════════════════
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  setOrb('speaking');
+  const utt = new SpeechSynthesisUtterance(text.replace(/[*_#`]/g,''));
+  utt.lang = lang;
+  utt.rate  = parseFloat(document.getElementById('rateSlider').value) || 0.95;
+  utt.pitch = parseFloat(document.getElementById('pitchSlider').value) || 0.85;
+  utt.volume = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const v = voices.find(v=>v.lang===lang) || voices.find(v=>v.lang.startsWith(lang.split('-')[0])) || voices.find(v=>v.lang.startsWith('en'));
+  if (v) utt.voice = v;
+  utt.onend = () => { setOrb('idle'); setStatus('READY','active'); };
+  window.speechSynthesis.speak(utt);
+}
+
+function testVoice() {
+  const name = memory['name'] || 'Sir';
+  speak(`Hello ${name}, all systems are operational. JARVIS is ready.`);
+}
+
+if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+
+// ════════════════════════════════════════════════
+//  SEND TEXT / QUICK
+// ════════════════════════════════════════════════
+function sendTxt() {
+  const i=document.getElementById('txtIn');
+  const t=i.value.trim(); if(!t) return;
+  i.value=''; addMsg('user',t); askJarvis(t);
+}
+
+function qcmd(t) { addMsg('user',t); goPage('chat'); askJarvis(t); }
+
+// ════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════
+initBattery(); initNetwork(); initLocation();
+
+setTimeout(()=>{
+  if (apiKey) {
+    setStatus('SYSTEM ONLINE','active');
+    const name=memory['name'];
+    const greeting=name?`Welcome back, ${name}. All systems online.`:'JARVIS online. All systems operational.';
+    addMsg('jarvis',greeting); speak(greeting);
+  } else {
+    setStatus('AWAITING API KEY','idle');
+    addMsg('sys','⚠ Go to Settings and enter your Claude API key to activate JARVIS.');
+  }
+}, 1000);
+</script>
+</body>
+</html>
